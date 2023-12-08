@@ -25,7 +25,7 @@ class AuthController extends Controller
         try{
             
             if(!Auth::attempt($credentials)){
-                return response(['message' => "Account is not registered"], 200);
+                return response(['message' => "Account is not registered"], 404);
             } 
 
             $user = $this->model->where('email', $request->email)->first();            
@@ -39,20 +39,19 @@ class AuthController extends Controller
     }
 
      
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|confirmed|min:6', 
-        ]);
+    public function register(Request $request){
+    $request->validate([
+        'name' => 'required|string',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|string|confirmed|min:6',
+    ]);
 
-        try{
-            $request['role'] = '1';
-            $this->model->create($request->all());
-            return response(['message' => "Successfully created"], 201);
-        }catch(\Exception $e){
-            return response(['message' => $e->getMessage()], 400);
+    try {
+        $request['role'] = '1';
+        $user = $this->model->create($request->all());
+        return response()->json(['message' => 'Successfully registered', 'user' => $user], 201);
+    } catch (\Exception $e) {
+        return response(['message' => $e->getMessage()], 400);
         }
-    } 
+    }
 }
